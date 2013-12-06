@@ -1,0 +1,232 @@
+R Basics
+===============
+Data entry, data structures
+---------------
+
+R uses objects (sets of numbers, letters, tables, matrices, etc) and functions (sets of instructions). Anything that is, is an object. Anything that does, is a function. It's good practice to save useful things as objects - it will maje your life easier and your code easier to read. You can name objects almoste whatever you want, but you'll probably develop a system as you go to keep things organized. In R code, anything following a "#" is a comment - even if you try to tell R to run the code, it will ignore it.   
+
+# Getting Data Into R
+### If you have spreadsheets...
+Save Excel files as .csv or .txt. Other formats will work, but with a bit more difficulty. These are the most useful functions:
+```{r readfns, eval=FALSE}
+read.csv()	# For .csv; assumes you have a header row: default is 'header=TRUE'
+read.table()	# More general (often .txt); assumes you don't have a header row: default is 'header=FALSE'
+scan()	# If you have a list of numbers or characters from Word or the internet separated by spaces
+```
+
+Let's create an object called 'sample.df' and load a .csv file.
+```{r readfns.examp}
+sample.df <- read.csv(file="sample.csv")
+# Or, if you need to find the file, use 'read.csv(file.choose())' instead
+```
+### If you need to create or enter data directly in R...
+There are many, many ways to do this. Here are some simple but useful functions. Be careful with them and make sure they do what you think they're doing.
+```{r cseqrep, eval=FALSE}
+c(5, 47, 30, 2)    # Type the data in manually
+seq(5, 10, by=0.5)   # Create a sequence
+seq(10, 0, by=-2)
+rep("A", 5)    # Repeat an item or object
+rep(100, 4)
+rep(c(5, 47, 30), 3)
+rep(c("a", "b", "c"), each=5)
+```
+
+------------------  
+
+# Data structures
+R stores information in very specific ways and each has distinct properties. Each object has elements - think of an element (a.k.a, item) as a slot where R stores a datum (number, character, etc). The numbers in the output above in the square brackets show the element number ('index') for the first element in the line of output. The different types of data (e.g., number or character) are called classes, though that term is used for the following data structures as well. Here are some of the most important ways of arranging data:
+ - **Vector:** a one dimensional object that can be (among others) characters or numbers, but all elements are the same class
+ - **Matrix:** a two dimensional object that can be characters or numbers, but all elements are the same class and it needs to be rectangular
+ - **Array:** like a matrix, but as many dimensions as you can handle
+ - **Dataframe:** a two dimensional object, but each column can be a different type of data but it still needs to be rectangular  
+ - **List:** a one dimensional object, but each item can be a different class
+	
+### Vectors  
+```{r vectors, eval=FALSE}
+v1 <- c(102, 32, 132, 329, 87)
+v2 <- c("Mammoth", "Mastodon", "Gomphothere", "Titanothere", "Megatherium")
+v3 <- c(1, 2, 3, "axon", "bellows", "cellos")
+v4 <- rep(seq(12, 20, 2), each=2)
+
+class(v1)
+class(v2)
+class(v3)
+class(v4)
+```
+
+```{r vectorsOBJ, echo=FALSE}
+v1 <- 1:5
+v2 <- c("Alpha", "B", "Charlie", "Two Words", "Or maybe three!?")
+v3 <- c(1, 2, 3, "axon", "bellows", "cellos")
+v4 <- rep(seq(12, 20, 2), each=2)
+```
+The extract operator "[ ]" is really useful. Use it to pull out specific elements by referencing the indices.
+```{r vectorextract, eval=FALSE}
+v1
+v1[4]
+v1[1:4]
+
+v2
+v2[3]
+v2[3:2]
+
+v3
+v3[c(1,3,4,4,6)]
+v3[seq(2, 6, 2)]
+```
+
+### Matrices
+```{r matrices, eval=FALSE}
+mx1 <- matrix(1:10, nrow=5)  # Since there are 10 items and 'nrow=5', R decides that 'ncol=2'
+mx2 <- matrix(1:10, nrow=2, byrow=T)
+mx3 <- cbind(v1, v2)  # 'rbind()' binds as rows instead of columns
+mx4 <- matrix(v3, ncol=2, dimnames=list(c("A","B","C"), c("a","b")))
+
+class(mx1)
+class(mx2)
+class(mx3)
+class(mx4)
+```
+
+```{r matricesOBJ, echo=FALSE}
+mx1 <- matrix(1:10, nrow=5)  # Since there are 10 items and 'nrow=5', R decides that 'ncol=2'
+mx2 <- matrix(1:10, nrow=2, byrow=T)
+mx3 <- cbind(v1, v2)  # 'rbind()' binds as rows instead of columns
+mx4 <- matrix(v3, ncol=2, dimnames=list(c("A","B","C"), c("a","b")))
+```
+You can extract elements from any object - you just need to specify the correct number of dimensions. For a matrix, the syntax is ['rows', 'columns']. If you want all of the rows or columns, leave the corresponding space blank as below.  
+```{r matrixextract, eval=FALSE}
+mx1
+mx1[3,1]
+mx3
+mx3[c(2,5), 2]
+mx4
+mx4[1,]
+mx4[,2]
+mx4["C", "b"]  # Since we gave the rows and columns names, we can use them
+
+class(mx1)
+class(mx1[1,1])
+class(mx3)
+class(mx3[1,1])
+```
+
+
+### Dataframes
+When you use the functions *read.csv()* or *read.table()*, they're creating dataframes. You can also create them from scratch in R either by creating vectors
+```{r dataframes, eval=FALSE}
+df1 <- data.frame(v1, mx1)
+df2 <- data.frame(Species=v2, Counts=v1)
+df3 <- data.frame(Size=c("S", "M", "L", "XL"), Weight=c(75, 84, 99, 103))
+df4 <- data.frame(SnakeBites=seq(100, 122, 2), Site=rep(c("A", "B"), each=6) )
+
+class(df1)
+class(df2)
+class(df3)
+```
+
+```{r dataframesOBJ, echo=FALSE}
+df1 <- data.frame(v1, mx1)
+df2 <- data.frame(Species=v2, Counts=v1)
+df3 <- data.frame(Size=c("S", "M", "L", "XL"), Weight=c(75, 84, 99, 103))
+df4 <- data.frame(SnakeBites=seq(100, 122, 2), Site=rep(c("A", "B"), each=6) )
+```
+
+There are many ways of doing the same thing, but some methods that seem like they should yield the same results actually give very different output...
+```{r dataframeextract, eval=FALSE}
+df1
+df1[2:4, 1:2]
+
+df2
+df2[,1]
+df2[,"Species"]
+df2$Species
+df2[["Species"]]   # class?
+df2["Species"]     # class?
+
+df4
+class(df4)
+df4[df4$Site=="A",1]
+class(df4[df4$Site=="A",1])
+```
+
+### Lists  
+Lists seem odd at first, but they can be very useful.  
+```{r lists, eval=FALSE}
+ls1 <- list(v1, v2, v3)
+ls2 <- list(Vec=v3, Mx=mx2, DF=df2)
+
+class(ls1)
+class(ls2)
+```
+
+```{r listsOBJ, echo=FALSE}
+ls1 <- list(v1, v2, v3)
+ls2 <- list(Vec=v3, Mx=mx2, DF=df2)
+```
+
+```{r listextract, eval=FALSE}
+ls1
+ls1[1]      # class?
+ls1[[1]]    # class?
+ls1[[1]][3] # class?
+
+ls2
+ls2[[3]]
+ls2$DF
+ls2["DF"]
+ls2[["DF"]]
+ls2[[3]][3:5,]
+ls2$DF[3:5,]
+ls2$DF["Species"]
+```
+
+
+# Useful functions
+Use "?" to open the help file for a function: *?class*  
+```{r usefulfns, eval=FALSE}
+# Object creation
+rep
+seq
+factor
+vector
+matrix
+cbind
+rbind
+array
+data.frame
+list
+table
+
+# Basic statistics
+mean
+median
+sd
+var
+length
+
+# Distributions
+rnorm
+runif
+rbinom
+rpois
+rgamma
+
+# Miscellaneous
+==   # And other relational operators - use ?"=="
+&    # And other logical operators - use ?"&"
+exp
+log
+log10
+tapply
+paste
+unique
+
+```
+
+
+
+# Include paste(), paste0(), saving a workspace, subsetting
+getwd()		# This is the working directory - the folder where R will look unless told otherwise. To set
+			# it, you can either drag a folder onto the R icon on your dashboard (on a Mac) or go to 
+			# Misc -> Change Working Directory.
